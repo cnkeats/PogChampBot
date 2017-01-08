@@ -21,6 +21,7 @@ class PogChampBot extends PircBot {
 	int PogChampCount;
 	int counter;
 	int timeout = 1000 * 60 * 60; //1 hour
+	long startTime = 1483891200000L;
 	ArrayList<String> lastTenMessages;
 	
 	PogChampBot() throws IOException {
@@ -36,6 +37,7 @@ class PogChampBot extends PircBot {
 	public void onMessage(String channel, String sender, String login, String hostname, String message) {
 		
 		lastMessageTime = System.currentTimeMillis();
+		System.out.println(lastMessageTime);
 		
 		
 		if (channel.equals("#krohnos")) {
@@ -50,8 +52,10 @@ class PogChampBot extends PircBot {
 			}
 		}
 		
+		
 		//if AGDQ 2017 hasn't started
-		if (System.currentTimeMillis() < 1483873200) {
+		if (System.currentTimeMillis() < startTime) {
+			System.out.println("AGDQ2017 hasn't started!");
 				return;
 		}
 		
