@@ -19,6 +19,7 @@ class PogChampBot extends PircBot {
 	long timeAtPogChamp;
 	int PogChampCount;
 	int counter;
+	int timeout = 1000 * 60 * 60 *12; //12 hours
 	ArrayList<String> lastTenMessages;
 	
 	PogChampBot() throws IOException {
@@ -34,6 +35,12 @@ class PogChampBot extends PircBot {
 		
 		lastMessageTime = System.currentTimeMillis();
 		
+		System.out.println(channel);
+		
+		if (channel.equals("#krohnos")) {
+			sendMessage(channel, "Hello! Current PogChamp count is [" + PogChampCount + "]");
+		}
+		
 		if (!sender.equals(this.getName())) {
 			lastTenMessages.add(message);
 			if (lastTenMessages.size() > 10) {
@@ -42,7 +49,7 @@ class PogChampBot extends PircBot {
 		}
 		
 		
-		if (timeAtPogChamp + 3000 < lastMessageTime && shouldWePogChamp()) {
+		if (timeAtPogChamp + 30000 < lastMessageTime && shouldWePogChamp()) {
 			timeAtPogChamp = System.currentTimeMillis();
 			sendMessage(channel, "PogChamp");
 			PogChampCount++;
@@ -70,12 +77,12 @@ class PogChampBot extends PircBot {
 		}
 		
 		
-		return (counter > 3);
+		return (counter > 2);
 	}
 	
 	public void checkActivity() {
 		
-		if (System.currentTimeMillis() - lastMessageTime > 300000) {
+		if (System.currentTimeMillis() - lastMessageTime > timeout) {
 			System.out.println("\nExiting due to lack of activity.");
 			System.exit(0);
 		}
