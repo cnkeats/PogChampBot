@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.jibble.pircbot.PircBot;
 
@@ -19,11 +20,12 @@ class PogChampBot extends PircBot {
 	long timeAtPogChamp;
 	int PogChampCount;
 	int counter;
-	int timeout = 1000 * 60 * 60 *12; //12 hours
+	int timeout = 1000 * 60 * 60; //1 hour
 	ArrayList<String> lastTenMessages;
 	
 	PogChampBot() throws IOException {
 		this.setAuthentication();
+		this.loadPogChampsFromFile();
 		
 		lastTenMessages = new ArrayList<String>();
 		lastMessageTime = System.currentTimeMillis();
@@ -35,10 +37,22 @@ class PogChampBot extends PircBot {
 		
 		lastMessageTime = System.currentTimeMillis();
 		
-		System.out.println(channel);
 		
 		if (channel.equals("#krohnos")) {
 			sendMessage(channel, "Hello! Current PogChamp count is [" + PogChampCount + "]");
+			if (message.equals("!save")) {
+				if (writePogChampsToFile()) {
+					sendMessage(channel, "PogChamps saved! Current count is [" + PogChampCount + "]");
+				}
+				else {
+					sendMessage(channel, "PogChamps NOT saved WutFace Current count is [" + PogChampCount + "]");
+				}
+			}
+		}
+		
+		//if AGDQ 2017 hasn't started
+		if (System.currentTimeMillis() < 1483873200) {
+				return;
 		}
 		
 		if (!sender.equals(this.getName())) {
@@ -56,7 +70,7 @@ class PogChampBot extends PircBot {
 		}
 		
 		if (message.contains("PogChamp")) {
-			PogChampCount++;	
+			PogChampCount += (message.split("PogChamp", -1).length-1);	
 			if (PogChampCount % 10 == 1) {
 				System.out.println("Number of messages containing PogChamp: " + PogChampCount);
 				writePogChampsToFile();
@@ -81,6 +95,11 @@ class PogChampBot extends PircBot {
 	}
 	
 	public void checkActivity() {
+		
+		//if AGDQ 2017 hasn't started
+		if (System.currentTimeMillis() < 1483873200) {
+			return;
+		}
 		
 		if (System.currentTimeMillis() - lastMessageTime > timeout) {
 			System.out.println("\nExiting due to lack of activity.");
@@ -111,7 +130,7 @@ class PogChampBot extends PircBot {
 		
 	}
 	
-	void writePogChampsToFile() {
+	boolean writePogChampsToFile() {
 		File file = new File("data/PogChampCount.txt");
 		FileWriter fw;
 		try {
@@ -122,7 +141,21 @@ class PogChampBot extends PircBot {
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.out.println("Failed to write to \"data/PogChampCount.txt\"");
+			return false;
 		}
+		return true;
+	}
+	
+	void loadPogChampsFromFile() throws IOException {
+		
+		File file = new File("data/PogChampCount.txt");
+		BufferedReader reader = new BufferedReader(new FileReader(file));
+
+		PogChampCount = Integer.parseInt(reader.readLine());
+		reader.close();
+		
+		System.out.println("PogChamps loaded! Current count is [" + PogChampCount + "]");
+		
 	}
 	
 	protected void onDisconnect() {

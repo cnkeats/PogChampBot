@@ -15,7 +15,7 @@ class Main {
 		
 		bot.setVerbose(false);
 		bot.connect("irc.twitch.tv",6667,bot.authKey);
-		//bot.joinChannel("#gamesdonequick");
+		bot.joinChannel("#gamesdonequick");
 		bot.joinChannel("#krohnos");
 		
 		while (true) {
