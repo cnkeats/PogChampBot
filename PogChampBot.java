@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Random;
@@ -24,10 +26,13 @@ class PogChampBot extends PircBot {
 	int myPogChamps;
 	int counter;
 	int timeout = 1000 * 60 * 60; //1 hour
+	long delay = 15000L;
 	long startTime = 1483891200000L;
+	SimpleDateFormat date = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 	ArrayList<String> lastTenMessages;
 	
 	Random rand;
+	DecimalFormat twoDecimals = new DecimalFormat("#.##");
 	
 	PogChampBot() throws IOException {
 		this.setAuthentication();
@@ -47,7 +52,8 @@ class PogChampBot extends PircBot {
 		
 		if (channel.equals("#krohnos")) {
 			if (message.equals("!status")) {
-				sendMessage(channel, "Hello! Current PogChamp count is [" + PogChampCount + "]. My count is [" + myPogChamps + "]");
+				sendMessage(channel, "Hello! Current PogChamp count is [" + PogChampCount + "]. My count is [" + myPogChamps + "] (" + 
+												(twoDecimals.format((double)myPogChamps / (double)PogChampCount * 100)) + "% of all PogChamps!)");
 			}
 			else if (message.equals("!save")) {
 				if (writePogChampsToFile()) {
@@ -65,6 +71,14 @@ class PogChampBot extends PircBot {
 				return;
 		}
 		
+		//if it's too late, more time between PogChamps
+		if (System.currentTimeMillis() < 1483938000000L) {
+			delay = 5400000L;
+		}
+		else {
+			delay = 15000L;
+		}
+		
 		if (!sender.equals(this.getName())) {
 			lastTenMessages.add(message);
 			if (lastTenMessages.size() > 10) {
@@ -72,15 +86,20 @@ class PogChampBot extends PircBot {
 			}
 		}
 		
-		
-		if (timeAtPogChamp + 8000 < lastMessageTime && shouldWePogChamp()) {
+		if (timeAtPogChamp + delay < lastMessageTime && shouldWePogChamp()) {
 			timeAtPogChamp = System.currentTimeMillis();
 			//System.out.println("\"PogChamp " + new String(new char[rand.nextInt(3)]).replace("\0", " ") + "\"");
 			//sendMessage(channel, "PogChamp ");
-			sendMessage(channel, "PogChamp " + new String(new char[rand.nextInt(3)]).replace("\0", " "));
+			try {
+				Thread.sleep((long)rand.nextInt(3000));
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			sendMessage(channel, "PogChamp " + new String(new char[rand.nextInt(6)]).replace("\0", " "));
 			PogChampCount++;
 			myPogChamps++;
-			System.out.println("Time to PogChamp! [Time: " + timeAtPogChamp + "] [My Count: " + myPogChamps + "]");
+			System.out.println("Time to PogChamp! [Time: " + date.format(timeAtPogChamp) + "] [My Count: " + myPogChamps + " ("+ 
+									(twoDecimals.format((double)myPogChamps / (double)PogChampCount * 100)) + "% of all PogChamps!)]");
 		}
 		
 		if (message.contains("PogChamp")) {
